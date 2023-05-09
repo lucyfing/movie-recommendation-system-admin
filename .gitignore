@@ -43,7 +43,6 @@ build
 /types
 /src/services/ant-design-pro
 /src/services/swagger
-/src/pages/TableList
 /src/locales
 /src/components
 /public

@@ -1,8 +1,8 @@
-import { addRule, removeRule, updateRule } from '@/services/ant-design-pro/api';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Movie, MovieList } from '@/lib/app-interface';
+import { addRule } from '@/services/ant-design-pro/api';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
-  FooterToolbar,
   ModalForm,
   PageContainer,
   ProFormText,
@@ -11,11 +11,8 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Drawer, message, Popconfirm, Space } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
-import type { FormValueType } from '../TableList/components/UpdateForm';
-import UpdateForm from '../TableList/components/UpdateForm';
 import movieApi from '../../services/movie';
 import utils from '../../utils/index';
-import { Movie, MovieList } from '@/lib/app-interface';
 import { MovieDetail } from './components/MovieDetail';
 
 /**
@@ -37,39 +34,9 @@ const handleAdd = async (fields: API.RuleListItem) => {
   }
 };
 
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('Configuring');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
-
-    message.success('Configuration is successful');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Configuration failed, please try again!');
-    return false;
-  }
-};
-
-
-
-
 const TableList: React.FC = () => {
   // 新建窗口的弹窗
   const [createModalOpen, handleModalOpen] = useState<boolean>(false);
-  // 更新窗口的弹窗
-  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
@@ -84,7 +51,7 @@ const TableList: React.FC = () => {
       title: 'doubanId',
       dataIndex: 'doubanId',
       hideInTable: true,
-      search: false
+      search: false,
     },
     {
       title: '电影名称',
@@ -108,7 +75,7 @@ const TableList: React.FC = () => {
       dataIndex: 'description',
       valueType: 'textarea',
       ellipsis: true,
-      search: false
+      search: false,
     },
     {
       title: '评分',
@@ -125,8 +92,8 @@ const TableList: React.FC = () => {
         '7': { text: '7' },
         '8': { text: '8' },
         '9': { text: '9' },
-        '10': { text: '10' }
-      }
+        '10': { text: '10' },
+      },
     },
     {
       title: '上映地区',
@@ -134,11 +101,7 @@ const TableList: React.FC = () => {
       valueType: 'select',
       valueEnum: countryList,
       ellipsis: true,
-      renderText: (value: [string]) => (
-        <>
-          {value.join(',')}
-        </>
-      ),
+      renderText: (value: [string]) => <>{value.join(',')}</>,
     },
     {
       title: '语言',
@@ -146,11 +109,7 @@ const TableList: React.FC = () => {
       valueType: 'select',
       valueEnum: languageList,
       ellipsis: true,
-      renderText: (value: [string]) => (
-        <>
-          {value.join(',')}
-        </>
-      )
+      renderText: (value: [string]) => <>{value.join(',')}</>,
     },
     {
       title: '操作',
@@ -166,15 +125,6 @@ const TableList: React.FC = () => {
         >
           详情
         </a>,
-        <a
-          key="update"
-          onClick={() => {
-            handleUpdateModalOpen(true);
-            setCurrentRow(record);
-          }}
-        >
-          修改
-        </a>,
         <Popconfirm
           title={`您确定要删除此条数据吗？`}
           onConfirm={() => deleteMovies(record.doubanId as unknown as string)}
@@ -182,16 +132,16 @@ const TableList: React.FC = () => {
           cancelText="取消"
         >
           <a key="delete">删除</a>
-        </Popconfirm>
+        </Popconfirm>,
       ],
     },
   ];
 
   // 获取电影列表
-  const getMovieList = async(page?:number, pageSize?:number)=>{
+  const getMovieList = async (page?: number, pageSize?: number) => {
     const data = await movieApi.getAllMovies(page, pageSize);
     setMovieList(data);
-  }
+  };
   useEffect(() => {
     getMovieList(1, pageSize);
     const getSearchList = async () => {
@@ -199,19 +149,18 @@ const TableList: React.FC = () => {
       setCountryList(data);
       const languageData = await movieApi.getAllLanguage();
       setLanguageList(languageData);
-    }
-    getSearchList()
-  }, [])
+    };
+    getSearchList();
+  }, []);
 
   // 删除电影
-  const deleteMovies = async(doubanIds: string[]|string) => {
-    const deletedCount = await movieApi.delMovies(doubanIds)
-    if(deletedCount>0) {
-      message.success('删除成功')
-      getMovieList(movieList?.currentPage, pageSize)
+  const deleteMovies = async (doubanIds: string[] | string) => {
+    const deletedCount = await movieApi.delMovies(doubanIds);
+    if (deletedCount > 0) {
+      message.success('删除成功');
+      getMovieList(movieList?.currentPage, pageSize);
     }
-  }
-
+  };
 
   return (
     <PageContainer>
@@ -220,7 +169,7 @@ const TableList: React.FC = () => {
         actionRef={actionRef}
         rowKey="doubanId"
         search={{
-          labelWidth: 120,
+          labelWidth: 100,
           defaultCollapsed: false,
           optionRender: ({ searchText, resetText }, { form }) => [
             <Button
@@ -228,9 +177,9 @@ const TableList: React.FC = () => {
               type="primary"
               onClick={async () => {
                 const values = form?.getFieldsValue();
-                if(!!values.name) values.name = utils.escapeHtml(values.name);
-                const page = movieList?.currentPage
-                const data = await movieApi.getFilterMovies({...values, page, pageSize});
+                if (!!values.name) values.name = utils.escapeHtml(values.name);
+                const page = movieList?.currentPage;
+                const data = await movieApi.getFilterMovies({ ...values, page, pageSize });
                 setMovieList(data);
               }}
             >
@@ -244,7 +193,7 @@ const TableList: React.FC = () => {
             >
               {resetText}
             </Button>,
-          ]
+          ],
         }}
         toolBarRender={() => [
           <Button
@@ -285,12 +234,12 @@ const TableList: React.FC = () => {
           pageSize: pageSize,
           total: movieList?.totalMovies,
           showTotal: (total, range) => `共 ${total} 条，${range[0]}-${range[1]} 条`,
-          onChange: (page, pageSize) => getMovieList(page, pageSize)
+          onChange: (page, pageSize) => getMovieList(page, pageSize),
         }}
       />
       {/* 新建弹窗 */}
       <ModalForm
-        title='新建电影'
+        title="新建电影"
         width="400px"
         open={createModalOpen}
         onOpenChange={handleModalOpen}
@@ -315,28 +264,11 @@ const TableList: React.FC = () => {
           name="name"
         />
         <ProFormTextArea width="md" name="desc" />
+        <ProFormText label="电影名称" width="md" name="name" />
+        <ProFormText label="豆瓣Id" width="md" name="username" />
+        <ProFormText label="豆瓣Id" width="md" name="username" />
+        <ProFormText label="邮箱" width="md" name="email" />
       </ModalForm>
-
-      <UpdateForm
-        onSubmit={async (value) => {
-          const success = await handleUpdate(value);
-          if (success) {
-            handleUpdateModalOpen(false);
-            setCurrentRow(undefined);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-        onCancel={() => {
-          handleUpdateModalOpen(false);
-          if (!showDetail) {
-            setCurrentRow(undefined);
-          }
-        }}
-        updateModalOpen={updateModalOpen}
-        values={currentRow || {}}
-      />
 
       {/* 详情弹窗 */}
       <Drawer
@@ -348,7 +280,7 @@ const TableList: React.FC = () => {
         }}
         closable={false}
       >
-        <MovieDetail movieDetail={currentRow as unknown as Movie}/>
+        <MovieDetail movieDetail={currentRow as unknown as Movie} />
       </Drawer>
     </PageContainer>
   );

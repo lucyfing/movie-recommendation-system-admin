@@ -1,19 +1,13 @@
 import Footer from '@/components/Footer';
 import { login } from '@/services/ant-design-pro/api';
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormText,
-} from '@ant-design/pro-components';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
-import { history, useModel, Helmet } from '@umijs/max';
+import { Helmet, history, useModel } from '@umijs/max';
 import { message } from 'antd';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
-
+import './index.less';
 
 const Login: React.FC = () => {
   const [type] = useState<string>('account');
@@ -63,76 +57,57 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className={containerClassName}>
+    <div className="loginBox">
       <Helmet>
         <title>电影推荐系统-管理端</title>
       </Helmet>
-      <div
-        style={{
-          flex: '1',
-          padding: '32px 0',
-        }}
-      >
+      <div className="loginForm">
         <LoginForm
           contentStyle={{
             minWidth: 280,
             maxWidth: '75vw',
-            marginTop: '3vh'
+            marginTop: '3vh',
           }}
           title="电影推荐系统管理端"
           initialValues={{
             autoLogin: true,
             username: 'admin',
-            password: 'ant.design'
+            password: 'ant.design',
           }}
           onFinish={async (values) => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-
           <ProFormText
-                name="username"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <UserOutlined />,
-                }}
-                placeholder='用户名: admin or user'
-                rules={[
-                  {
-                    required: true,
-                    message: '请输入用户名!',
-                  },
-                ]}
-              />
-              <ProFormText.Password
-                name="password"
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
-                placeholder='密码: ant.design'
-                rules={[
-                  {
-                    required: true,
-                    message: '请输入密码',
-                  },
-                ]}
-              />
-
-          <div
-            style={{
-              marginBottom: 24,
+            name="username"
+            fieldProps={{
+              size: 'large',
+              prefix: <UserOutlined />,
             }}
-          >
-            <a
-              style={{
-                float: 'left',
-                marginBottom: 10
-              }}
-            >
-              忘记密码
-            </a>
-          </div>
+            placeholder="用户名: admin"
+            label="用户名"
+            rules={[
+              {
+                required: true,
+                message: '请输入用户名!',
+              },
+            ]}
+          />
+          <ProFormText.Password
+            name="password"
+            fieldProps={{
+              size: 'large',
+              prefix: <LockOutlined />,
+            }}
+            placeholder="密码: ant.design"
+            label="登录密码"
+            rules={[
+              {
+                required: true,
+                message: '请输入密码',
+              },
+            ]}
+          />
         </LoginForm>
       </div>
       <Footer />

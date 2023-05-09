@@ -24,18 +24,24 @@ export default [
   },
   {
     path: '/welcome',
-    name: '首页',
+    name: '电影排行榜',
     icon: 'smile',
-    component: './Welcome',
+    component: './Welcome/Welcome',
   },
   {
     path: '/moviesList',
-    name: '电影数据',
+    name: '电影管理',
     icon: 'youtube',
     component: './MoviesList',
   },
   {
-    name: '表格',
+    path: '/usersList',
+    name: '用户管理',
+    icon: 'User',
+    component: './UsersList',
+  },
+  {
+    name: '类型管理',
     icon: 'table',
     path: '/list',
     component: './TableList',
