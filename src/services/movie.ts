@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import { Movie, MovieList } from '../lib/app-interface';
 import movieUtils from '../utils/movie';
-import { deleteRequest, getRequest } from '../utils/request';
+import { deleteRequest, getRequest, postRequest } from '../utils/request';
 
 // 获取电影列表
 const getAllMovies = async (page?: number, pageSize?: number) => {
@@ -98,10 +98,20 @@ const delMovies = async (doubanIds: string[] | string) => {
   return deletedCount;
 };
 
+// 新增电影
+const addMovie = async (newMovie: any) => {
+  const resp = await postRequest('/api/admin/addMovie', { newMovie });
+  return {
+    success: resp.data.success,
+    msg: resp.data.message,
+  };
+};
+
 export default {
   getAllMovies,
   getAllCountry,
   getAllLanguage,
   getFilterMovies,
   delMovies,
+  addMovie,
 };

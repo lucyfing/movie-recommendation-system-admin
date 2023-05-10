@@ -1,12 +1,14 @@
 import { Movie, MovieList } from '@/lib/app-interface';
 import { addRule } from '@/services/ant-design-pro/api';
 import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
+  ActionType,
   ModalForm,
   PageContainer,
+  ProColumns,
+  ProFormDigit,
+  ProFormInstance,
   ProFormText,
-  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Drawer, message, Popconfirm, Space } from 'antd';
@@ -44,6 +46,7 @@ const TableList: React.FC = () => {
   const [movieList, setMovieList] = useState<MovieList>();
   const [countryList, setCountryList] = useState<any>({});
   const [languageList, setLanguageList] = useState<any>({});
+  const restFormRef = useRef<ProFormInstance>();
 
   const pageSize: number = 10;
   const columns: ProColumns<API.RuleListItem>[] = [
@@ -241,33 +244,56 @@ const TableList: React.FC = () => {
       <ModalForm
         title="新建电影"
         width="400px"
+        formRef={restFormRef}
         open={createModalOpen}
         onOpenChange={handleModalOpen}
+        submitter={{
+          searchConfig: {
+            resetText: '取消',
+          },
+          resetButtonProps: {
+            onClick: () => {
+              restFormRef.current?.resetFields();
+              handleModalOpen(false);
+            },
+          },
+        }}
         onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
+          const newMovie = {
+            ...value,
+            movieTypes: value.movieTypes.split(','),
+            languages: value.languages.split(','),
+            countries: value.countries.split(','),
+            actors: value.actors.split(','),
+            directors: value.directors.split(','),
+            writers: value.writers.split(','),
+            dateReleased: '未知',
+            collectionVotes: 0,
+          };
+          const { success, msg } = await movieApi.addMovie(newMovie);
           if (success) {
+            message.success(msg);
+            restFormRef.current?.resetFields();
             handleModalOpen(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
+          }
+          if (!success) {
+            message.warning(msg);
           }
         }}
       >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: 'Rule name is required',
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-        <ProFormText label="电影名称" width="md" name="name" />
-        <ProFormText label="豆瓣Id" width="md" name="username" />
-        <ProFormText label="豆瓣Id" width="md" name="username" />
-        <ProFormText label="邮箱" width="md" name="email" />
+        <ProFormText label="电影名称" width="md" name="name" rules={[{ required: true }]} />
+        <ProFormText label="豆瓣Id" width="md" name="doubanId" rules={[{ required: true }]} />
+        <ProFormText label="简介" width="md" name="description" rules={[{ required: true }]} />
+        <ProFormDigit label="评分" width="md" name="rate" rules={[{ required: true }]} />
+        <ProFormText label="电影预告" width="md" name="video" rules={[{ required: true }]} />
+        <ProFormText label="电影海报" width="md" name="poster" rules={[{ required: true }]} />
+        <ProFormText label="电影类型" width="md" name="movieTypes" rules={[{ required: true }]} />
+        <ProFormDigit label="电影年份" width="md" name="year" rules={[{ required: true }]} />
+        <ProFormText label="电影语言" width="md" name="languages" rules={[{ required: true }]} />
+        <ProFormText label="电影地区" width="md" name="countries" rules={[{ required: true }]} />
+        <ProFormText label="电影演员" width="md" name="actors" rules={[{ required: true }]} />
+        <ProFormText label="电影导演" width="md" name="directors" rules={[{ required: true }]} />
+        <ProFormText label="电影编剧" width="md" name="writers" rules={[{ required: true }]} />
       </ModalForm>
 
       {/* 详情弹窗 */}
